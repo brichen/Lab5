@@ -46,7 +46,7 @@ submitBtn.addEventListener('submit', (event) => {
   ctx.textAlign = 'center'; 
 
   ctx.fillText(topText.value, c.width/2, 30);
-  ctx.fillText(bottomText.value, c.width/2, c.height - 10);
+  ctx.fillText(bottomText.value, c.width/2, c.height - 5);
 
   submit.disabled = true;
   clear.disabled = false;
