@@ -4,7 +4,7 @@
 - Brian
 - Amy Nguyen
 
-## Part 1:
+## Part 1: https://brichen.github.io/Lab5/
 
 LINK TO YOUR PUBLISHED SITE
 
