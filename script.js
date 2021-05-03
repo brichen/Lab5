@@ -1,16 +1,144 @@
 // script.js
 
 const img = new Image(); // used to load image from <input> and draw to canvas
+const c = document.getElementById('user-image');
+const ctx = c.getContext('2d');
 
+const clear = document.querySelector("[type='reset']");
+const read = document.querySelector("[type='button']");
+const submit = document.querySelector("[type='submit']");
+const voices = document.getElementById("voice-selection");
+const submitBtn = document.getElementById('generate-meme');
+
+const topText = document.getElementById('text-top');
+const bottomText = document.getElementById('text-bottom');
+
+const slider = document.querySelector("[type='range']");
+const group = document.getElementById("volume-group");
+const pic = document.querySelector('#volume-group img');
+
+var imgInput = document.getElementById('image-input');
+imgInput.addEventListener('input', () => {
+  img.src = URL.createObjectURL(imgInput.files[0]);
+  let fileIndex = objectURL.lastIndexOf("/") + 1;
+  let fileName = objectURL.substr(fileIndex);
+  img.alt = fileName;
+});
 // Fires whenever the img object loads a new image (such as with img.src =)
 img.addEventListener('load', () => {
   // TODO
-
   // Some helpful tips:
   // - Fill the whole Canvas with black first to add borders on non-square images, then draw on top
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, c.width, c.height);
   // - Clear the form when a new image is selected
+  document.getElementById('generate-meme').reset();
   // - If you draw the image to canvas here, it will update as soon as a new image is selected
+  var d = getDimmensions(c.width, c.height, img.width, img.height);
+  ctx.drawImage(img, d.startX, d.startY, d.width, d.height);
 });
+
+submitBtn.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  ctx.font = "30px Arial";
+  ctx.fillStyle = 'white';
+  ctx.textAlign = 'center'; 
+
+  ctx.fillText(topText.value, c.width/2, 30);
+  ctx.fillText(bottomText.value, c.width/2, c.height - 10);
+
+  submit.disabled = true;
+  clear.disabled = false;
+  read.disabled = false;
+  voices.disabled = false;
+
+  populateVoices();
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = populateVoices;
+  }
+});
+
+clear.addEventListener('click', event => {
+  event.preventDefault();
+
+  ctx.clearRect(0, 0, c.width, c.height);
+
+  submit.disabled = false;
+  clear.disabled = true;
+  read.disabled = true;
+  voices.disabled = true;
+  
+});
+
+read.addEventListener('click', event => {
+  event.preventDefault();
+
+  let synth = window.speechSynthesis;
+
+  let topUtterance = new SpeechSynthesisUtterance(topText.value);
+  let bottomUtterance = new SpeechSynthesisUtterance(bottomText.value);
+  let availableVoices = synth.getVoices();
+
+  let selectedOption = voices.selectedOptions[0].getAttribute('data-name');
+
+  for(let i = 0; i < availableVoices.length ; i++) {
+    if(availableVoices[i].name === selectedOption) {
+      topUtterance.voice = availableVoices[i];
+      bottomUtterance.voice = availableVoices[i];
+    }
+  }
+
+  topUtterance.volume = (slider.value/100);
+  bottomUtterance.volume = (slider.value/100);
+
+  window.speechSynthesis.cancel();
+  
+  synth.speak(topUtterance);
+  synth.speak(bottomUtterance);
+});
+
+function populateVoices(){
+  
+  let synth = window.speechSynthesis;
+  let availableVoices = synth.getVoices();
+
+  //fill available voices
+  for(let i = 0; i < availableVoices.length ; i++) {
+    let option = document.createElement('option'); 
+    option.textContent = availableVoices[i].name + ' (' + availableVoices[i].lang + ')';
+
+    if(availableVoices[i].default) {
+      option.textContent += ' -- DEFAULT';
+    }
+
+    option.setAttribute('data-lang', availableVoices[i].lang);
+    option.setAttribute('data-name', availableVoices[i].name);
+    voices.appendChild(option);
+  }
+}
+
+group.addEventListener('input', event => {
+  event.preventDefault();
+  
+  if((slider.value/100) >= .67){
+    pic.src = 'icons/volume-level-3.svg';
+    pic.alt = 'Volume Level 3';
+  }
+  else if((slider.value/100) >= .34){
+    pic.src = 'icons/volume-level-2.svg';
+    pic.alt = 'Volume Level 2';
+  }
+  else if((slider.value/100) >= .01){
+    pic.src = 'icons/volume-level-1.svg'; 
+    pic.alt = 'Volume Level 1';
+  }
+  else{
+    pic.src = 'icons/volume-level-0.svg';
+    pic.alt = 'Volume Level 0';
+  }
+  
+  });
 
 /**
  * Takes in the dimensions of the canvas and the new image, then calculates the new
