@@ -1,7 +1,7 @@
 # CSE110 SP21 Lab 5
 
 ## Author(s):
-- Brian
+- Brian Chen
 - Amy Nguyen
 
 ## Part 1: 
